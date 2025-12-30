@@ -20,6 +20,7 @@ public class FunctionTest
             },
             Body = JsonSerializer.Serialize(new { domain = "example.com" })
         };
+        
         var function = new Function();
 
         // Act
