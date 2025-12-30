@@ -1,20 +1,34 @@
 using Xunit;
-using Amazon.Lambda.Core;
 using Amazon.Lambda.TestUtilities;
+using Amazon.Lambda.APIGatewayEvents;
+using System.Text.Json;
+using Shouldly;
 
 namespace TodoApi.Tests;
 
 public class FunctionTest
 {
     [Fact]
-    public void TestToUpperFunction()
+    public async Task TestFunctionHandler()
     {
+        // Arrange
+        var request = new APIGatewayHttpApiV2ProxyRequest
+        {
+            RequestContext = new()
+            {
+                Http = new() { Method = "POST" }
+            },
+            Body = JsonSerializer.Serialize(new { domain = "example.com" })
+        };
+        var function = new Function();
 
-        // Invoke the lambda function and confirm the string was upper cased.
-        // var function = new Function();
-        // var context = new TestLambdaContext();
-        // var upperCase = function.FunctionHandler("hello world", context);
+        // Act
+        var response = await function.FunctionHandler(request, new TestLambdaContext());
 
-        // Assert.Equal("HELLO WORLD", upperCase);
+        // Assert
+        response.StatusCode.ShouldBe(200);
+        response.Body.ShouldBe("Hello from Lambda!");
+        response.Headers.ShouldContainKey("Content-Type");
+        response.Headers["Content-Type"].ShouldBe("application/json");
     }
 }
